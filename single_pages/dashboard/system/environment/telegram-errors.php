@@ -93,7 +93,7 @@ defined('C5_EXECUTE') or die('Access Denied.');
                 <br />&nbsp;
             </li>
             <li>
-                <?= t('Create a new Telegram group') ?>
+                <?= t('Create a new Telegram group and add to it your newly created bot') ?>
                 <br />&nbsp;
             </li>
             <li>
