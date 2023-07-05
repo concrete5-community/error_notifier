@@ -27,12 +27,19 @@ class ErrorNotifier
     protected $tgToken;
 
     /**
-     * @param string $tgToken
+     * @var bool
      */
-    public function __construct(Application $app, $tgToken)
+    protected $stripWebroot;
+
+    /**
+     * @param string $tgToken
+     * @param bool $stripWebroot
+     */
+    public function __construct(Application $app, $tgToken, $stripWebroot)
     {
         $this->app = $app;
         $this->tgToken = $tgToken;
+        $this->stripWebroot = $stripWebroot;
     }
 
     /**
@@ -73,6 +80,9 @@ class ErrorNotifier
         $formattedMessage = $this->formatMessage($message);
         if ($formattedMessage === '') {
             return;
+        }
+        if ($this->stripWebroot) {
+            $formattedMessage = $this->removeWebrootFromMessage($formattedMessage);
         }
         $client = $this->app->make(Client::class);
         $error = null;
@@ -219,7 +229,7 @@ class ErrorNotifier
     /**
      * @return string
      */
-    private function getRequestURL()
+    protected function getRequestURL()
     {
         if ($this->app->isRunThroughCommandLineInterface()) {
             return '';
@@ -231,5 +241,38 @@ class ErrorNotifier
         }
 
         return '';
+    }
+
+    /**
+     * @param string $formattedMessage
+     *
+     * @return string
+     */
+    protected function removeWebrootFromMessage($formattedMessage)
+    {
+        $replacements = [
+            rtrim(str_replace(DIRECTORY_SEPARATOR, '/', DIR_BASE), '/') . '/' => '[webroot]/',
+        ];
+        if (DIRECTORY_SEPARATOR === '/') {
+            return strtr($formattedMessage, $replacements);
+        }
+        $slashes = '[' . preg_quote('/\\', '/') . ']';
+        foreach ($replacements as $search => $replacement) {
+            $rxSearch = '/'
+                . implode(
+                    $slashes,
+                    array_map(
+                        static function ($chunk) {
+                            return preg_quote($chunk, '/');
+                        },
+                        explode('/', rtrim($search, '/'))
+                    )
+                )
+                . '\b/'
+            ;
+            $formattedMessage = preg_replace($rxSearch, rtrim($replacement, '/'), $formattedMessage);
+        }
+
+        return $formattedMessage;
     }
 }

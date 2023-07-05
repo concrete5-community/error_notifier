@@ -120,7 +120,10 @@ class TelegramErrors extends DashboardPageController
         if ($tgRecipients === []) {
             throw new UserMessageException(t('Please specify at least one recipient'));
         }
-        $notifier = $this->app->make(ErrorNotifier::class, ['tgToken' => $tgToken]);
+        $notifier = $this->app->make(ErrorNotifier::class, [
+            'tgToken' => $tgToken,
+            'stripWebroot' => (bool) $this->app->make(Repository::class)->get('telegram_errors::options.stripWebroot', true),
+        ]);
         $error = $notifier->notify($tgRecipients, t('Sample message to check if sending a message to Telegram works.'), true);
         if ($error !== null) {
             throw new UserMessageException($error->getMessage());

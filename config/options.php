@@ -7,4 +7,5 @@ return [
     'minExceptionsLogLevel' => 250,
     'token' => '',
     'recipients' => '',
+    'stripWebroot' => true,
 ];

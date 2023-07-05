@@ -59,6 +59,9 @@ trait HandlerTrait
             throw new RuntimeException(t('The Telegram token is not configured'));
         }
 
-        return $this->app->make(ErrorNotifier::class, ['tgToken' => $tgToken]);
+        return $this->app->make(ErrorNotifier::class, [
+            'tgToken' => $tgToken,
+            'stripWebroot' => (bool) $config->get('telegram_errors::options.stripWebroot', true),
+        ]);
     }
 }
