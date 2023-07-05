@@ -22,7 +22,7 @@ defined('C5_EXECUTE') or die('Access Denied.');
     <?php $token->output('tg-save') ?>
 
     <div class="form-group">
-        <label class="control-label"><?= t('Options') ?></label>
+        <?= $form->label('', t('Options')) ?>
         <div class="checkbox">
             <label>
                 <?= $form->checkbox('hookWhoops', '1', $hookWhoops) ?>
