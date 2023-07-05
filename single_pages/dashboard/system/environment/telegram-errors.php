@@ -47,7 +47,7 @@ defined('C5_EXECUTE') or die('Access Denied.');
                     <span><?= t('Send a notification when an event is written to the %s log', '<code>log/exceptions</code>') ?></span>
                 </label>
                 <?php
-                if ($hookWhoops) {
+                if ($hookExceptionsLog) {
                     ?>
                     <span class="small"><br /><a href="javascript:void(0)" class="tg-try-now" data-what="log/exceptions"><?= t('Write to the %s log now', '<code>log/exceptions</code>') ?></a></span>
                     <?php
