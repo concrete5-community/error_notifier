@@ -80,7 +80,7 @@ defined('C5_EXECUTE') or die('Access Denied.');
         <?= $form->textarea('tg_recipients', $tg_recipients === [] ? '' : (implode("\n", $tg_recipients) . "\n")) ?>
         <div class="small text-muted"><?= t('Separate multiple recipients with spaces or new lines') ?></div>
     </div>
-    
+
     <div class="alert alert-info">
         <h4><?= t('Instructions') ?></h4>
         <ol>
@@ -127,18 +127,37 @@ $('.tg-try-now').on('click', function() {
         });
         return;
     }
-    $.concreteAjax({
+    var what = $(this).data('what');
+    var send = {
         url: <?= json_encode($view->action('tryNow')) ?>,
         data: {
             <?= json_encode($token::DEFAULT_TOKEN_NAME) ?>: <?= json_encode($token->generate('tg-tryNow')) ?>,
-            what: $(this).data('what')
-        },
-        success: function(data) {
-            ConcreteAlert.info({
-                message: data.message
-            });
+            what: what
         }
-    });
+    };
+    switch (what) {
+        case 'exception':
+            send.error = function(xhr, status, err) {
+                if (xhr.status >= 500) {
+                    ConcreteAlert.info({
+                        message: <?= json_encode(t('The exception has been thrown')) ?>
+                    });
+                } else {
+                    ConcreteAlert.error({
+                        message: ConcreteAjaxRequest.renderErrorResponse(xhr, false)
+                    });
+                }
+            };
+            break;
+        case 'log/exceptions':
+            send.success = function(data) {
+                ConcreteAlert.info({
+                    message: data.message
+                });
+            };
+            break;
+    }
+    $.concreteAjax(send);
 });
 
 $('#te-test-telegram').on('click', function() {
