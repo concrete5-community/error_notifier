@@ -33,7 +33,7 @@ class Controller extends Package implements ProviderAggregateInterface
      *
      * @var string
      */
-    protected $pkgVersion = '0.0.5';
+    protected $pkgVersion = '0.1.0';
 
     /**
      * {@inheritdoc}
