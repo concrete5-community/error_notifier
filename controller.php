@@ -1,13 +1,11 @@
 <?php
 
-namespace Concrete\Package\TelegramErrors;
+namespace Concrete\Package\ErrorNotifier;
 
 use Concrete\Core\Application\Application;
-use Concrete\Core\Config\Repository\Repository;
 use Concrete\Core\Database\EntityManager\Provider\ProviderAggregateInterface;
 use Concrete\Core\Database\EntityManager\Provider\StandardPackageProvider;
 use Concrete\Core\Package\Package;
-use Whoops\Run;
 
 /**
  * The package controller.
@@ -28,7 +26,7 @@ class Controller extends Package implements ProviderAggregateInterface
      *
      * @var string
      */
-    protected $pkgHandle = 'telegram_errors';
+    protected $pkgHandle = 'error_notifier';
 
     /**
      * The package version.
@@ -44,7 +42,7 @@ class Controller extends Package implements ProviderAggregateInterface
      */
     public function getPackageName()
     {
-        return t('Notify via Telegram');
+        return t('Error Notifier');
     }
 
     /**
@@ -54,7 +52,7 @@ class Controller extends Package implements ProviderAggregateInterface
      */
     public function getPackageDescription()
     {
-        return t('Send errors and warnings to Telegram.');
+        return t('Send errors and warnings to Slack and Telegram.');
     }
 
     /**
@@ -91,21 +89,15 @@ class Controller extends Package implements ProviderAggregateInterface
 
     public function on_start()
     {
-        $config = $this->app->make(Repository::class);
-        if ($config->get('telegram_errors::options.whoops')) {
-            if ($this->app->bound(Run::class)) {
-                $this->app->make(Run::class)->pushHandler($this->app->make(WhoopsErrorHandler::class));
+        if ($this->app->bound(\Whoops\Run::class)) {
+            $this->app->make(\Whoops\Run::class)->pushHandler($this->app->make(Handler\Whoops::class));
+        }
+        $this->app->extend('log/exceptions', static function ($logger, Application $app) {
+            if ($logger instanceof \Monolog\Logger) {
+                $logger->pushHandler($app->make(Handler\Monolog::class));
             }
-        }
-        if ($config->get('telegram_errors::options.exceptionsLog')) {
-            $minEeceptionsLogLevel = $config->get('telegram_errors::options.minExceptionsLogLevel');
-            $this->app->extend('log/exceptions', static function ($logger, Application $app) use ($minEeceptionsLogLevel) {
-                if ($logger instanceof \Monolog\Logger) {
-                    $logger->pushHandler($app->make(MonologHandler::class, ['level' => (int) $minEeceptionsLogLevel]));
-                }
 
-                return $logger;
-            });
-        }
+            return $logger;
+        });
     }
 }

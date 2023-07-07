@@ -1,13 +1,13 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name" : "mlocati-concrete5-packages/telegram_errors",
+    "name" : "mlocati-concrete5-packages/error_notifier",
     "type" : "concrete5-package",
-    "description" : "A concrete5 / ConcreteCMS package that send errors and warnings to Telegram.",
+    "description" : "A concrete5 / ConcreteCMS package that send errors and warnings to Slack and Telegram.",
     "license" : "proprietary",
-    "homepage" : "https://github.com/mlocati/ccm-telegram_errors",
+    "homepage" : "https://github.com/mlocati/ccm-error-notifier",
     "support" : {
-        "issues" : "https://github.com/mlocati/ccm-telegram_errors/issues",
-        "source" : "https://github.com/mlocati/ccm-telegram_errors"
+        "issues" : "https://github.com/mlocati/ccm-error-notifier/issues",
+        "source" : "https://github.com/mlocati/ccm-error-notifier"
     },
     "require": {
         "php": ">=5.5.9",
