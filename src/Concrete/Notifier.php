@@ -88,7 +88,7 @@ abstract class Notifier
             }
         }
         if ($this->stripWebroot) {
-            $this->removeWebrootFromMessage($result);
+            $result = $this->removeWebrootFromMessage($result);
         }
         if ($maxLength !== null && mb_strlen($result) > $maxLength) {
             $result = trim(mb_substr($result, 0, $maxLength));

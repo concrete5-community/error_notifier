@@ -53,9 +53,10 @@ class Service
     private function buildNotifiers(array &$errors)
     {
         $config = $this->app->make(Repository::class);
+        $stripWebroot = !empty($config->get('error_notifier::options.stripWebroot'));
         if ($config->get('error_notifier::options.telegram.enabled')) {
             try {
-                yield $this->buildTelegramNotifier($config->get('error_notifier::options.telegram'));
+                yield $this->buildTelegramNotifier($config->get('error_notifier::options.telegram'), $stripWebroot);
             } catch (Exception $x) {
                 $errors[] = $x;
             } catch (Throwable $x) {
@@ -64,7 +65,7 @@ class Service
         }
         if ($config->get('error_notifier::options.slack.enabled')) {
             try {
-                yield $this->buildSlackNotifier($config->get('error_notifier::options.slack'));
+                yield $this->buildSlackNotifier($config->get('error_notifier::options.slack'), $stripWebroot);
             } catch (Exception $x) {
                 $errors[] = $x;
             } catch (Throwable $x) {
@@ -73,7 +74,12 @@ class Service
         }
     }
 
-    private function buildTelegramNotifier(array $options)
+    /**
+     * @param bool $stripWebroot
+     *
+     * @return \Concrete\Package\ErrorNotifier\Notifier\Telegram
+     */
+    private function buildTelegramNotifier(array $options, $stripWebroot)
     {
         $token = isset($options['token']) ? $options['token'] : null;
         if (!is_string($token) || ($token = trim($token)) === '') {
@@ -88,11 +94,16 @@ class Service
         return $this->app->make(Notifier\Telegram::class, [
             'token' => $token,
             'recipients' => $recipients,
-            'stripWebroot' => !empty($options['stripWebroot']),
+            'stripWebroot' => $stripWebroot,
         ]);
     }
 
-    private function buildSlackNotifier(array $options)
+    /**
+     * @param bool $stripWebroot
+     *
+     * @return \Concrete\Package\ErrorNotifier\Notifier\Slack
+     */
+    private function buildSlackNotifier(array $options, $stripWebroot)
     {
         $token = isset($options['token']) ? $options['token'] : null;
         if (!is_string($token) || ($token = trim($token)) === '') {
@@ -107,7 +118,7 @@ class Service
         return $this->app->make(Notifier\Slack::class, [
             'token' => $token,
             'channels' => $channels,
-            'stripWebroot' => !empty($options['stripWebroot']),
+            'stripWebroot' => $stripWebroot,
         ]);
     }
 }
