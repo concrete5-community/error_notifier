@@ -195,7 +195,7 @@ new Vue({
             switch (what) {
                 case 'uncaughtException':
                     send.error = function(xhr, status, err) {
-                        if (xhr?.responseJSON?.error?.message === <?= json_encode($sampleUncaughtExceptionMessage) ?>) {
+                        if (xhr?.responseJSON?.error?.message === <?= json_encode($sampleUncaughtExceptionMessage) ?> || xhr?.responseJSON?.error?.message === <?= json_encode(t('An error occurred while processing this request.')) ?>) {
                             ConcreteAlert.info({
                                 message: <?= json_encode(t('The exception has been thrown')) ?>
                             });
