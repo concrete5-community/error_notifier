@@ -60,13 +60,13 @@ abstract class Notifier
     protected function formatMessage($message, $maxLength = null)
     {
         $url = $this->getRequestURL();
-        $userID = $this->getCurrentUserID();
+        $userDescription = $this->getCurrentUserDescription();
         if ($message instanceof Exception || $message instanceof Throwable) {
             $result = trim($message->getMessage());
             if ($result === '') {
                 $result = get_class($message);
             }
-            $result .= "\n\nUser: " . ($userID === null ? 'guest' : "ID {$userID}");
+            $result .= "\n\nUser: {$userDescription}";
             if ($url !== '') {
                 $result .= "\n\nURL: {$url}";
             }
@@ -82,7 +82,7 @@ abstract class Notifier
             if ($result === '') {
                 return '';
             }
-            $result .= "\n\nUser: " . ($userID === null ? 'guest' : "ID {$userID}");
+            $result .= "\n\nUser: {$userDescription}";
             if ($url !== '') {
                 $result .= "\n\nURL: {$url}";
             }
@@ -197,26 +197,26 @@ abstract class Notifier
     }
 
     /**
-     * @return int|null
+     * @return string
      */
-    private function getCurrentUserID()
+    private function getCurrentUserDescription()
     {
         if ($this->app->isRunThroughCommandLineInterface()) {
-            return null;
+            return 'CLI';
         }
         try {
             $user = $this->app->make(User::class);
             if ($user->isRegistered()) {
                 $userID = (int) $user->getUserID();
                 if ($userID !== 0) {
-                    return $userID;
+                    return "User {$userID}";
                 }
             }
         } catch (Exception $x) {
         } catch (Throwable $x) {
         }
 
-        return '';
+        return 'Guest';
     }
 
     /**
