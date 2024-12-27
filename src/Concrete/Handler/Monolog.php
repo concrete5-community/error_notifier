@@ -29,7 +29,7 @@ class Monolog extends AbstractHandler
     public function handle(array $record)
     {
         if ($this->isHandling($record)) {
-            if ($this->app->make(Repository::class)->get('error_notifier::options.exceptionsLog')) {
+            if ($this->app->make(Repository::class)->get('error_notifier::options.interceptLogWrites')) {
                 $this->app->make(Service::class)->notify($this->getFormatter()->format($record));
             }
         }

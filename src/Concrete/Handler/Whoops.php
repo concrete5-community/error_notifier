@@ -24,7 +24,7 @@ class Whoops extends Handler
      */
     public function handle()
     {
-        if ($this->app->make(Repository::class)->get('error_notifier::options.whoops')) {
+        if ($this->app->make(Repository::class)->get('error_notifier::options.interceptExceptions')) {
             $exception = $this->getException();
             if ($exception && !$exception instanceof UserMessageException) {
                 $this->app->make(Service::class)->notify($exception);

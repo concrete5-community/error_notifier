@@ -1,8 +1,8 @@
 <?php
 
 return [
-    'whoops' => false,
-    'exceptionsLog' => false,
+    'interceptExceptions' => false,
+    'interceptLogWrites' => false,
     /** @see Monolog\Logger::NOTICE */
     'minExceptionsLogLevel' => 250,
     'stripWebroot' => true,

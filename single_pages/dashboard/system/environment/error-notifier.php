@@ -7,9 +7,9 @@ defined('C5_EXECUTE') or die('Access Denied.');
  * @var Concrete\Core\Validation\CSRF\Token $token
  * @var Concrete\Core\Page\View\PageView $view
  * @var string $sampleUncaughtExceptionMessage
- * @var bool $hookWhoops
+ * @var bool $interceptExceptions
  * @var bool $canHookExceptionsLog
- * @var bool $hookExceptionsLog
+ * @var bool $interceptLogWrites
  * @var int $minExceptionsLogLevel
  * @var array $exceptionsLogLevels (not empty if $canHookExceptionsLog is true)
  * @var bool $telegramEnabled
@@ -28,21 +28,21 @@ defined('C5_EXECUTE') or die('Access Denied.');
         <div class="form-group">
             <div class="checkbox">
                 <label>
-                    <?= $form->checkbox('hookWhoops', '1', $hookWhoops, ['v-model' => 'current.hookWhoops']) ?>
+                    <?= $form->checkbox('interceptExceptions', '1', $interceptExceptions, ['v-model' => 'current.interceptExceptions']) ?>
                     <span>
                         <?= t('Send a notification when uncaught exceptions occur') ?>
                     </span>
                 </label>
-                <div class="small" v-bind:class="current.hookWhoops ? '' : 'invisible'">
+                <div class="small" v-bind:class="current.interceptExceptions ? '' : 'invisible'">
                     <a href="#" v-on:click.prevent="tryNow('uncaughtException')"><?= t('Throw an uncaught exception now') ?></a>
                 </div>
             </div>
             <div class="checkbox" v-if="canHookExceptionsLog">
                 <label>
-                    <?= $form->checkbox('hookExceptionsLog', '1', $hookExceptionsLog, ['v-model' => 'current.hookExceptionsLog']) ?>
+                    <?= $form->checkbox('interceptLogWrites', '1', $interceptLogWrites, ['v-model' => 'current.interceptLogWrites']) ?>
                     <span><?= t('Send a notification when an event is written to the %s log', '<code>log/exceptions</code>') ?></span>
                 </label>
-                <div class="small" v-bind:class="current.hookExceptionsLog ? '' : 'invisible'">
+                <div class="small" v-bind:class="current.interceptLogWrites ? '' : 'invisible'">
                     <a href="#" v-on:click.prevent="tryNow('log/exceptions')"><?= t('Write to the %s log now', '<code>log/exceptions</code>') ?></a>
                 </div>
             </div>
@@ -122,8 +122,8 @@ new Vue({
     data() {
         <?php
         $savedData = json_encode(compact(
-            'hookWhoops',
-            'hookExceptionsLog',
+            'interceptExceptions',
+            'interceptLogWrites',
             'minExceptionsLogLevel',
             'telegramEnabled',
             'telegramToken',

@@ -33,9 +33,9 @@ EOT
         $config = $this->app->make(Repository::class);
         $canHookExceptionsLog = $this->canHookExceptionsLog();
         $this->set('sampleUncaughtExceptionMessage', $this->getSampleUncaughtExceptionMessage());
-        $this->set('hookWhoops', (bool) $config->get('error_notifier::options.whoops', false));
+        $this->set('interceptExceptions', (bool) $config->get('error_notifier::options.interceptExceptions', false));
         $this->set('canHookExceptionsLog', $canHookExceptionsLog);
-        $this->set('hookExceptionsLog', (bool) $config->get('error_notifier::options.exceptionsLog', false));
+        $this->set('interceptLogWrites', (bool) $config->get('error_notifier::options.interceptLogWrites', false));
         $this->set('minExceptionsLogLevel', (int) $config->get('error_notifier::options.minExceptionsLogLevel', 250));
         $this->set('exceptionsLogLevels', $canHookExceptionsLog ? $this->getMonologDictionary() : []);
         $this->set('telegramEnabled', (bool) $config->get('error_notifier::options.telegram.enabled', false));
@@ -58,9 +58,9 @@ EOT
         if (!$this->token->validate('en-save')) {
             $this->error->add($this->token->getErrorMessage());
         } else {
-            $hookWhoops = !empty($this->request->request->get('hookWhoops'));
+            $interceptExceptions = !empty($this->request->request->get('interceptExceptions'));
             $canHookExceptionsLog = $this->canHookExceptionsLog();
-            $hookExceptionsLog = $canHookExceptionsLog && !empty($this->request->request->get('hookExceptionsLog'));
+            $interceptLogWrites = $canHookExceptionsLog && !empty($this->request->request->get('interceptLogWrites'));
             if ($canHookExceptionsLog) {
                 $minExceptionsLogLevel = (int) $this->request->request->get('minExceptionsLogLevel');
                 try {
@@ -69,7 +69,7 @@ EOT
                     $this->error->add(t('Please specify the minimum log level'));
                 }
             }
-            $hookExceptionsLog = $canHookExceptionsLog && !empty($this->request->request->get('hookExceptionsLog'));
+            $interceptLogWrites = $canHookExceptionsLog && !empty($this->request->request->get('interceptLogWrites'));
             $telegramEnabled = !empty($this->request->request->get('telegramEnabled'));
             if ($telegramEnabled) {
                 $telegramToken = trim((string) $this->request->request->get('telegramToken', ''));
@@ -103,8 +103,8 @@ EOT
             return $this->view();
         }
         $config = $this->app->make(Repository::class);
-        $config->save('error_notifier::options.whoops', $hookWhoops);
-        $config->save('error_notifier::options.exceptionsLog', $hookExceptionsLog);
+        $config->save('error_notifier::options.interceptExceptions', $interceptExceptions);
+        $config->save('error_notifier::options.interceptLogWrites', $interceptLogWrites);
         if ($canHookExceptionsLog) {
             $config->save('error_notifier::options.minExceptionsLogLevel', $minExceptionsLogLevel);
         }
