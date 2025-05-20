@@ -2,9 +2,8 @@
 
 namespace Concrete\Package\ErrorNotifier\Handler;
 
-use Concrete\Core\Application\Application;
-use Concrete\Core\Config\Repository\Repository;
 use Concrete\Core\Error\UserMessageException;
+use Concrete\Package\ErrorNotifier\Options;
 use Concrete\Package\ErrorNotifier\Service;
 use Whoops\Handler\Handler;
 
@@ -12,9 +11,23 @@ defined('C5_EXECUTE') or die('Access Denied');
 
 class Whoops extends Handler
 {
-    public function __construct(Application $app)
+    /**
+     * @var \Concrete\Package\ErrorNotifier\Options
+     */
+    private $errorNotifierOptions;
+
+    /**
+     * @var \Concrete\Package\ErrorNotifier\Service
+     */
+    private $errorNotifierService;
+
+    /**
+     * @param int $level
+     */
+    public function __construct(Options $options, Service $service)
     {
-        $this->app = $app;
+        $this->errorNotifierOptions = $options;
+        $this->errorNotifierService = $service;
     }
 
     /**
@@ -24,10 +37,10 @@ class Whoops extends Handler
      */
     public function handle()
     {
-        if ($this->app->make(Repository::class)->get('error_notifier::options.interceptExceptions')) {
+        if ($this->errorNotifierOptions->isInterceptExceptions()) {
             $exception = $this->getException();
             if ($exception && !$exception instanceof UserMessageException) {
-                $this->app->make(Service::class)->notify($exception);
+                $this->errorNotifierService->notify($exception);
             }
         }
 

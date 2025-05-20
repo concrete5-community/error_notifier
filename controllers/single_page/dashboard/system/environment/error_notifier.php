@@ -7,6 +7,7 @@ use Concrete\Core\Error\UserMessageException;
 use Concrete\Core\Http\ResponseFactoryInterface;
 use Concrete\Core\Page\Controller\DashboardPageController;
 use Concrete\Package\ErrorNotifier\Notifier;
+use Concrete\Package\ErrorNotifier\Options;
 use Exception;
 use Monolog\Logger as MonologLogger;
 use RuntimeException;
@@ -30,22 +31,10 @@ class ErrorNotifier extends DashboardPageController
 </style>
 EOT
         );
-        $config = $this->app->make(Repository::class);
-        $canHookExceptionsLog = $this->canHookExceptionsLog();
+        $this->set('canHookExceptionsLog', $this->canHookExceptionsLog());
+        $this->set('exceptionsLogLevels', $this->getMonologDictionary());
         $this->set('sampleUncaughtExceptionMessage', $this->getSampleUncaughtExceptionMessage());
-        $this->set('interceptExceptions', (bool) $config->get('error_notifier::options.interceptExceptions', false));
-        $this->set('canHookExceptionsLog', $canHookExceptionsLog);
-        $this->set('interceptLogWrites', (bool) $config->get('error_notifier::options.interceptLogWrites', false));
-        $this->set('minExceptionsLogLevel', (int) $config->get('error_notifier::options.minExceptionsLogLevel', 250));
-        $this->set('exceptionsLogLevels', $canHookExceptionsLog ? $this->getMonologDictionary() : []);
-        $this->set('telegramEnabled', (bool) $config->get('error_notifier::options.telegram.enabled', false));
-        $this->set('telegramToken', (string) $config->get('error_notifier::options.telegram.token', ''));
-        $telegramRecipients = preg_split('/\s+/', (string) $config->get('error_notifier::options.telegram.recipients', ''), -1, PREG_SPLIT_NO_EMPTY);
-        $this->set('telegramRecipients', $telegramRecipients === [] ? '' : (implode("\n", $telegramRecipients) . "\n"));
-        $this->set('slackEnabled', (bool) $config->get('error_notifier::options.slack.enabled', false));
-        $this->set('slackToken', (string) $config->get('error_notifier::options.slack.token', ''));
-        $slackChannels = preg_split('/\s+/', (string) $config->get('error_notifier::options.slack.channels', ''), -1, PREG_SPLIT_NO_EMPTY);
-        $this->set('slackChannels', $slackChannels === [] ? '' : (implode("\n", $slackChannels) . "\n"));
+        $this->set('options', $this->app->make(Options::class));
 
         return null;
     }
@@ -57,6 +46,8 @@ EOT
     {
         if (!$this->token->validate('en-save')) {
             $this->error->add($this->token->getErrorMessage());
+        } elseif (get_class($this->app->make(Options::class)) !== Options\Config::class) {
+            $this->error->add(t("The configuration is defined by some custom code: you can't change it here."));
         } else {
             $interceptExceptions = !empty($this->request->request->get('interceptExceptions'));
             $canHookExceptionsLog = $this->canHookExceptionsLog();
@@ -161,10 +152,11 @@ EOT
         if ($telegramRecipients === []) {
             throw new UserMessageException(t('Please specify at least one Telegram recipient'));
         }
+        $options = $this->app->make(Options::class);
         $notifier = $this->app->make(Notifier\Telegram::class, [
             'token' => $telegramToken,
             'recipients' => $telegramRecipients,
-            'stripWebroot' => (bool) $this->app->make(Repository::class)->get('error_notifier::options.stripWebroot', true),
+            'stripWebroot' => $options->isStripWebroot(),
         ]);
         $errors = $notifier->notify(t('Sample message to check if sending a message to Telegram works.'));
         if ($errors !== []) {
@@ -190,10 +182,11 @@ EOT
         if ($slackChannels === []) {
             throw new UserMessageException(t('Please specify at least one Slack channel'));
         }
+        $options = $this->app->make(Options::class);
         $notifier = $this->app->make(Notifier\Slack::class, [
             'token' => $slackToken,
             'channels' => $slackChannels,
-            'stripWebroot' => (bool) $this->app->make(Repository::class)->get('error_notifier::options.stripWebroot', true),
+            'stripWebroot' => $options->isStripWebroot(),
         ]);
         $errors = $notifier->notify(t('Sample message to check if sending a message to Slack works.'));
         if ($errors !== []) {

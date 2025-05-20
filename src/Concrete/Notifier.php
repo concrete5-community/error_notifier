@@ -209,7 +209,7 @@ abstract class Notifier
             if ($user->isRegistered()) {
                 $userID = (int) $user->getUserID();
                 if ($userID !== 0) {
-                    return "User {$userID}";
+                    return "ID {$userID}";
                 }
             }
         } catch (Exception $x) {

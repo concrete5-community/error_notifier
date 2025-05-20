@@ -94,7 +94,7 @@ class Controller extends Package implements ProviderAggregateInterface
         $this->upgradingFrom = $entity ? (string) $entity->getPackageVersion() : '';
         parent::upgradeCoreData();
     }
-            
+
     /**
      * {@inheritdoc}
      *
@@ -113,6 +113,7 @@ class Controller extends Package implements ProviderAggregateInterface
 
     public function on_start()
     {
+        $this->app->bindIf(Options::class, static function() { return app(Options\Config::class); }, true);
         if ($this->app->bound('Whoops\Run')) {
             $this->app->make('Whoops\Run')->pushHandler($this->app->make(Handler\Whoops::class));
         } elseif ($this->app->bound('Concrete\Core\Error\Handling\ErrorHandler')) {
@@ -126,7 +127,7 @@ class Controller extends Package implements ProviderAggregateInterface
                 if ($logger instanceof \Monolog\Logger) {
                     $logger->pushHandler($app->make(Handler\Monolog::class));
                 }
-                
+
                 return $logger;
             });
         } else {

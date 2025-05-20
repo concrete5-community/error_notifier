@@ -3,7 +3,6 @@
 namespace Concrete\Package\ErrorNotifier;
 
 use Concrete\Core\Application\Application;
-use Concrete\Core\Config\Repository\Repository;
 use Exception;
 use RuntimeException;
 use Throwable;
@@ -14,6 +13,11 @@ class Service
      * @var \Concrete\Core\Application\Application
      */
     private $app;
+
+    /**
+     * @var \Concrete\Package\ErrorNotifier\Options|null
+     */
+    private $options;
 
     public function __construct(Application $app)
     {
@@ -48,24 +52,35 @@ class Service
     }
 
     /**
+     * @return \Concrete\Package\ErrorNotifier\Options
+     */
+    private function getOptions()
+    {
+        if (!$this->options) {
+            $this->options = $this->app->make(Options::class);
+        }
+
+        return $this->options;
+    }
+
+    /**
      * @return \Generator|\Concrete\Package\ErrorNotifier\Notifier[]
      */
     private function buildNotifiers(array &$errors)
     {
-        $config = $this->app->make(Repository::class);
-        $stripWebroot = !empty($config->get('error_notifier::options.stripWebroot'));
-        if ($config->get('error_notifier::options.telegram.enabled')) {
+        $options = $this->getOptions();
+        if ($options->isTelegramEnabled()) {
             try {
-                yield $this->buildTelegramNotifier($config->get('error_notifier::options.telegram'), $stripWebroot);
+                yield $this->buildTelegramNotifier();
             } catch (Exception $x) {
                 $errors[] = $x;
             } catch (Throwable $x) {
                 $errors[] = $x;
             }
         }
-        if ($config->get('error_notifier::options.slack.enabled')) {
+        if ($options->isSlackEnabled()) {
             try {
-                yield $this->buildSlackNotifier($config->get('error_notifier::options.slack'), $stripWebroot);
+                yield $this->buildSlackNotifier();
             } catch (Exception $x) {
                 $errors[] = $x;
             } catch (Throwable $x) {
@@ -79,22 +94,22 @@ class Service
      *
      * @return \Concrete\Package\ErrorNotifier\Notifier\Telegram
      */
-    private function buildTelegramNotifier(array $options, $stripWebroot)
+    private function buildTelegramNotifier()
     {
-        $token = isset($options['token']) ? $options['token'] : null;
+        $options = $this->getOptions();
+        $token = $options->getTelegramToken();
         if (!is_string($token) || ($token = trim($token)) === '') {
             throw new RuntimeException(t('Missing Telegram token'));
         }
-        $serializedRecipients = isset($options['recipients']) ? $options['recipients'] : null;
-        $recipients = is_string($serializedRecipients) ? preg_split('/\s+/', $serializedRecipients, -1, PREG_SPLIT_NO_EMPTY) : [];
-        if ($recipients === []) {
+        $recipients = $options->getTelegramRecipients();
+        if (!is_array($recipients) || $recipients === []) {
             throw new RuntimeException(t('Missing Telegram recipients'));
         }
 
         return $this->app->make(Notifier\Telegram::class, [
             'token' => $token,
             'recipients' => $recipients,
-            'stripWebroot' => $stripWebroot,
+            'stripWebroot' => $options->isStripWebroot(),
         ]);
     }
 
@@ -103,22 +118,22 @@ class Service
      *
      * @return \Concrete\Package\ErrorNotifier\Notifier\Slack
      */
-    private function buildSlackNotifier(array $options, $stripWebroot)
+    private function buildSlackNotifier()
     {
-        $token = isset($options['token']) ? $options['token'] : null;
+        $options = $this->getOptions();
+        $token = $options->getSlackToken();
         if (!is_string($token) || ($token = trim($token)) === '') {
             throw new RuntimeException(t('Missing Slack token'));
         }
-        $serializedChannels = isset($options['channels']) ? $options['channels'] : null;
-        $channels = is_string($serializedChannels) ? preg_split('/\s+/', $serializedChannels, -1, PREG_SPLIT_NO_EMPTY) : [];
-        if ($channels === []) {
+        $channels = $options->getSlackChannels();
+        if (!is_array($channels) || $channels === []) {
             throw new RuntimeException(t('Missing Slack channels'));
         }
 
         return $this->app->make(Notifier\Slack::class, [
             'token' => $token,
             'channels' => $channels,
-            'stripWebroot' => $stripWebroot,
+            'stripWebroot' => $options->isStripWebroot(),
         ]);
     }
 }
