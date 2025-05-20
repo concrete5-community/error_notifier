@@ -2,6 +2,7 @@
 
 namespace Concrete\Package\ErrorNotifier\Handler;
 
+use Concrete\Core\Application\Application;
 use Concrete\Package\ErrorNotifier\Options;
 use Concrete\Package\ErrorNotifier\Service;
 use Monolog\Handler\AbstractHandler;
@@ -11,22 +12,22 @@ defined('C5_EXECUTE') or die('Access Denied');
 class Monolog extends AbstractHandler
 {
     /**
+     * @var \Concrete\Core\Application\Application
+     */
+    private $app;
+
+    /**
      * @var \Concrete\Package\ErrorNotifier\Options
      */
     private $errorNotifierOptions;
 
     /**
-     * @var \Concrete\Package\ErrorNotifier\Service
-     */
-    private $errorNotifierService;
-
-    /**
      * @param int $level
      */
-    public function __construct(Options $options, Service $service)
+    public function __construct(Application $app, Options $options)
     {
+        $this->app = $app;
         $this->errorNotifierOptions = $options;
-        $this->errorNotifierService = $service;
         parent::__construct($this->errorNotifierOptions->getMinExceptionsLogLevel(), true);
     }
 
@@ -38,7 +39,7 @@ class Monolog extends AbstractHandler
     public function handle(array $record)
     {
         if ($this->isHandling($record) && $this->errorNotifierOptions->isInterceptLogWrites()) {
-            $this->errorNotifierService->notify($this->getFormatter()->format($record));
+            $this->app->make(Service::class)->notify($this->getFormatter()->format($record));
         }
 
         return false;

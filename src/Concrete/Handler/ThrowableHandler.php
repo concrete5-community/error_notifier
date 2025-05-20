@@ -2,6 +2,7 @@
 
 namespace Concrete\Package\ErrorNotifier\Handler;
 
+use Concrete\Core\Application\Application;
 use Concrete\Core\Error\UserMessageException;
 use Concrete\Package\ErrorNotifier\Options;
 use Concrete\Package\ErrorNotifier\Service;
@@ -12,26 +13,25 @@ defined('C5_EXECUTE') or die('Access Denied');
 class ThrowableHandler
 {
     /**
-     * @var \Concrete\Package\ErrorNotifier\Options
+     * @var \Concrete\Core\Application\Application
      */
-    private $errorNotifierOptions;
+    private $app;
 
     /**
      * @var \Concrete\Package\ErrorNotifier\Service
      */
     private $errorNotifierService;
 
-    public function __construct(Options $options, Service $service)
+    public function __construct(Application $app)
     {
-        $this->errorNotifierOptions = $options;
-        $this->errorNotifierService = $service;
+        $this->app = $app;
     }
 
     public function __invoke(Throwable $throwable)
     {
         if (!$throwable instanceof UserMessageException) {
-            if ($this->errorNotifierOptions->isInterceptExceptions()) {
-                $this->errorNotifierService->notify($throwable);
+            if ($this->app->make(Options::class)->isInterceptExceptions()) {
+                $this->app->make(Service::class)->notify($throwable);
             }
         }
     }
