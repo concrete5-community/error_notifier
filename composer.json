@@ -1,20 +1,47 @@
 {
-    "$schema": "https://getcomposer.org/schema.json",
-    "name" : "mlocati-concrete5-packages/error_notifier",
-    "type" : "concrete5-package",
-    "description" : "A concrete5 / ConcreteCMS package that send errors and warnings to Slack and Telegram.",
-    "license" : "proprietary",
+    "name": "concrete5-community/error_notifier",
+    "description" : "A ConcreteCMS/concrete5 package that send errors and warnings to Slack or Telegram",
+    "type": "concrete5-package",
+    "keywords": [
+        "concretecms",
+        "concrete",
+        "cms",
+        "concrete5",
+        "package",
+        "addon",
+        "error",
+        "notification",
+        "alert"
+    ],
     "homepage" : "https://github.com/mlocati/ccm-error-notifier",
-    "support" : {
-        "issues" : "https://github.com/mlocati/ccm-error-notifier/issues",
-        "source" : "https://github.com/mlocati/ccm-error-notifier"
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Michele Locati",
+            "email": "michele@locati.it",
+            "role": "author",
+            "homepage": "https://mlocati.github.io"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/concrete5-community/error_notifier/issues",
+        "source": "https://github.com/concrete5-community/error_notifier"
     },
     "require": {
-        "php": ">=5.5.9",
-        "concrete5/core": "^8.5 | ^9"
-    },
+       "concrete5/core": "^8.5.2 | ^9"
+     },
     "config": {
         "optimize-autoloader": true,
         "sort-packages": true
-    }
+    },
+    "funding": [
+        {
+            "type": "github",
+            "url": "https://github.com/sponsors/mlocati"
+        },
+        {
+            "type": "other",
+            "url": "https://paypal.me/mlocati"
+        }
+    ]
 }
