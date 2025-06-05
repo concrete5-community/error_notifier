@@ -13,7 +13,7 @@
         "notification",
         "alert"
     ],
-    "homepage" : "https://github.com/mlocati/ccm-error-notifier",
+    "homepage" : "https://github.com/concrete5-community/error_notifier",
     "license": "MIT",
     "authors": [
         {
