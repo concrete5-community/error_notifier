@@ -34,7 +34,7 @@ class Controller extends Package implements ProviderInterface
      *
      * @var string
      */
-    protected $pkgVersion = '1.2.2';
+    protected $pkgVersion = '1.2.3';
 
     /**
      * @var string
