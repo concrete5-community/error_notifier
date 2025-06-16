@@ -4,8 +4,7 @@ namespace Concrete\Package\ErrorNotifier;
 
 use Concrete\Core\Application\Application;
 use Concrete\Core\Config\Repository\Repository;
-use Concrete\Core\Database\EntityManager\Provider\ProviderAggregateInterface;
-use Concrete\Core\Database\EntityManager\Provider\StandardPackageProvider;
+use Concrete\Core\Database\EntityManager\Provider\ProviderInterface;
 use Concrete\Core\Logging\Channels;
 use Concrete\Core\Package\Package;
 
@@ -14,7 +13,7 @@ use Concrete\Core\Package\Package;
  *
  * Manages the package installation, update and start-up.
  */
-class Controller extends Package implements ProviderAggregateInterface
+class Controller extends Package implements ProviderInterface
 {
     /**
      * {@inheritdoc}
@@ -65,11 +64,11 @@ class Controller extends Package implements ProviderAggregateInterface
     /**
      * {@inheritdoc}
      *
-     * @see \Concrete\Core\Database\EntityManager\Provider\ProviderAggregateInterface::getEntityManagerProvider()
+     * @see \Concrete\Core\Database\EntityManager\Provider\ProviderInterface::getDrivers()
      */
-    public function getEntityManagerProvider()
+    public function getDrivers()
     {
-        return new StandardPackageProvider($this->app, $this, []);
+        return [];
     }
 
     /**
