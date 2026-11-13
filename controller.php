@@ -34,7 +34,7 @@ class Controller extends Package implements ProviderInterface
      *
      * @var string
      */
-    protected $pkgVersion = '1.2.3';
+    protected $pkgVersion = '1.2.4';
 
     /**
      * @var string
@@ -112,11 +112,12 @@ class Controller extends Package implements ProviderInterface
 
     public function on_start()
     {
-        $this->app->bindIf(Options::class, static function() { return app(Options\Config::class); }, true);
+        $this->app->bindIf(Options::class, static function () {
+            return app(Options\Config::class); }, true);
         if ($this->app->bound('Whoops\Run')) {
             $this->app->make('Whoops\Run')->pushHandler($this->app->make(Handler\Whoops::class));
         } elseif ($this->app->bound('Concrete\Core\Error\Handling\ErrorHandler')) {
-            $this->app->make('Concrete\Core\Error\Handling\ErrorHandler')->addExceptionListener(function(\Throwable $x) {
+            $this->app->make('Concrete\Core\Error\Handling\ErrorHandler')->addExceptionListener(function (\Throwable $x) {
                 $handler = $this->app->make(Handler\ThrowableHandler::class);
                 return $handler($x);
             });
@@ -131,8 +132,8 @@ class Controller extends Package implements ProviderInterface
             });
         } else {
             $director = $this->app->make('director');
-            $dispatcher =  method_exists($director, 'getEventDispatcher') ? $director->getEventDispatcher() : $director;
-            $dispatcher->addListener('on_logger_create', function($event) {
+            $dispatcher = method_exists($director, 'getEventDispatcher') ? $director->getEventDispatcher() : $director;
+            $dispatcher->addListener('on_logger_create', function ($event) {
                 $logger = method_exists($event, 'getLogger') ? $event->getLogger() : null;
                 if ($logger instanceof \Monolog\Logger && $logger->getName() === Channels::CHANNEL_EXCEPTIONS) {
                     /** @var \Monolog\Logger $logger */
