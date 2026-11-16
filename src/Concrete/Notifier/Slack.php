@@ -43,7 +43,7 @@ class Slack extends Notifier
     {
         $errors = [];
         try {
-            if ($this->recipients !== []) {
+            if ($this->channels !== []) {
                 $formattedMessage = $this->formatMessage($message, 4000);
                 if ($formattedMessage !== '') {
                     foreach ($this->channels as $channel) {
