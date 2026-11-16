@@ -161,7 +161,7 @@ new Vue({
                     case 'telegramRecipients':
                     case 'slackChannels':
                         stored = $.trim(stored.replace(/\s/g, ' '));
-                        current = $.trim(stored.replace(/\s/g, ' '));
+                        current = $.trim(current.replace(/\s/g, ' '));
                         break;
                 }
                 return stored !== current;
@@ -193,7 +193,9 @@ new Vue({
             switch (what) {
                 case 'uncaughtException':
                     send.error = function(xhr, status, err) {
-                        if (xhr?.responseJSON?.error?.message === <?= json_encode($sampleUncaughtExceptionMessage) ?> || xhr?.responseJSON?.error?.message === <?= json_encode(t('An error occurred while processing this request.')) ?>) {
+                        // Since ConcreteCMS 9.4 "error" is a boolean: the message is only in "errors"
+                        const message = xhr?.responseJSON?.error?.message ?? xhr?.responseJSON?.errors?.[0];
+                        if (message === <?= json_encode($sampleUncaughtExceptionMessage) ?> || message === <?= json_encode(t('An error occurred while processing this request.')) ?>) {
                             ConcreteAlert.info({
                                 message: <?= json_encode(t('The exception has been thrown')) ?>
                             });
